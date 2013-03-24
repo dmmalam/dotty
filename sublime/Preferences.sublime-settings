@@ -1,0 +1,52 @@
+{
+	"codeintel_syntax_map":
+	{
+		"CoffeeScript": "Node.js",
+		"JavaScript": "Node.js"
+	},
+	"color_scheme": "Packages/User/sublime-xoria.tmTheme",
+	"default_file_type_default_new_file_syntax": "Packages/Text/Plain text.tmLanguage",
+	"dictionary": "Packages/Language - English/en_GB.dic",
+	"ensure_newline_at_eof_on_save": true,
+	"find_selected_text": true,
+	"font_options":
+	[
+		"subpixel_antialias"
+	],
+	"font_size": 17.0,
+	"highlight_line": true,
+	"ignored_packages":
+	[
+	],
+	"indent_guide_options":
+	[
+		"draw_normal"
+	],
+	"rulers":
+	[
+	],
+	"spell_check": false,
+	"sublimeclang_hide_output_when_empty": true,
+	"sublimeclang_options":
+	[
+		"-Wall",
+		"-isystem",
+		"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/usr/include/",
+		"-isystem",
+		"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/usr/include/c++/4.2.1",
+		"-F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/",
+		"-isystem",
+		"/usr/include",
+		"-isystem",
+		"/usr/include/c++/*",
+		"-I/usr/local/include/node"
+	],
+	"sublimelinter_sublimelinter_executable_map":
+	{
+		"coffeescript": "/usr/local/share/npm/bin/coffee"
+	},
+	"tab_size": 2,
+	"theme": "Soda Dark.sublime-theme",
+	"translate_tabs_to_spaces": true,
+	"trim_trailing_white_space_on_save": true
+}

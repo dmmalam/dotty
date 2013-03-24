@@ -1,0 +1,4 @@
+*.cache
+Package Control.last-run
+SublimeREPLHistory/*
+Side Bar.sublime-settings

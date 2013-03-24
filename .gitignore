@@ -1,0 +1,9 @@
+.DS_Store
+# STOPS ACCIDENTLY ADDING KEYS TO GIT
+# Ignore all except explicate ssh/config
+ssh/*
+
+vim/bundle/*
+vim/.*
+
+weechat/logs/*
