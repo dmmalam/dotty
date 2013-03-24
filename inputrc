@@ -1,0 +1,50 @@
+# © 2013 D MALAM
+# Dotty inputrc
+
+# http://cnswww.cns.cwru.edu/php/chet/readline/readline.html
+
+# Vi editing mode, default is emacs
+#set editing-mode vi
+
+# UTF-8 input / output
+set input-meta on
+set output-meta on
+set convert-meta off
+
+# No Bells
+set bell-style none
+# Complete case insenstive
+set completion-ignore-case on
+# Treast - equal to _ for completions
+set completion-map-case on
+# Set completion items to 200
+set completion-query-items 200
+# History size 10k
+set history-size 10000
+# Preserve cursor pos
+set history-preserve-point on
+# Don't duplication if matched in middle of word
+set skip-completed-text on
+# Classify file types in completions
+set visible-stats
+# Add trailing slash on symlinks to directories
+set mark-symlinked-directories on
+
+# Up
+"\e[A": history-search-backward
+# Down
+"\e[B": history-search-forward
+# Home
+"\e[1~": beginning-of-line
+# End
+"\e[4~": end-of-line
+# Page Up
+"\e[5~": previous-history
+# Page Down
+"\e[6~": next-history
+# Delete
+"\e[3~": delete-char
+# FIXME: Kill whole line
+"\C-u": kill-whole-line
+# Kill word forward
+"\e(": kill-word

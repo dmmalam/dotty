@@ -1,0 +1,90 @@
+# © 2013 D MALAM
+# Dotty gitconfig
+
+[core]
+    # Global ignore.
+    excludesfile = ~/.gitignore_global
+    # Normalise line endings.
+    autocrlf = input
+    # Higher default compression.
+    compression = 8
+    # Output bytes > 0x80.
+    quotepath = false
+    # Whitespace settings for diff, etc.
+    whitespace = fix,tab-in-indent
+[apply]
+    # Atempt to fix whitespace.
+    whitespace = fix
+[branch]
+    # Set up branches so they merge appropriately from starting branch.
+    autosetupmerge = always
+    # Rebase instead of merge
+    autosetuprebase = always
+[color]
+    # Color for all UI
+    ui = auto
+[fetch]
+    # Always fetch submodules
+    recurseSubmodules = true
+[grep]
+    # Show line numbers
+    lineNumber = true
+    # Extended Regexs
+    extendedRegexp = true
+[push]
+    # Only push current branch
+    default = current
+[difftool]
+    # No prompts for vim
+    prompt = false
+[diff]
+    # Use vim for diffs
+    tool = vimdiff
+[merge]
+    # Include summaries of merged commits
+    summary = true
+    # Use vim for merges
+	tool = vimdiff
+[status]
+    # Show summary for submodules
+    submodulesummary = true
+[alias]
+    h = help
+    p = pull
+    a = add -vu
+    m = merge
+    ca = commit -a
+    cam = commit -am
+    cm = commit -m
+    co = checkout
+    nb = checkout -b
+    b = branch
+    bd = branch -d
+    bD = branch -D
+    br = branch --remote
+    bm = branch -m
+    st = status
+    s = status -sb
+    l = log --oneline --decorate --graph
+    tip = log -n 1
+    last = log -n 10 --oneline
+    d = diff master
+    d2 = diff HEAD@{1} HEAD@{0}
+    dt = difftool
+    mt = mergetool
+    r = rebase
+    ra = rebase --abort
+    rc = rebase --continue
+    rs = rebase --skip
+    cp = cherry-pick -x
+    t = tag -n1 -l
+    rwt = reset --hard HEAD # revert working tree
+    unci = reset --hard HEAD^ # uncommit
+    sup = submodule foreach --recursive git pull origin master
+    sadd = submodule add
+    forget = rm --cached
+    l50 = "!git log --abbrev-commit --date=short --pretty=format:'%x00%h%x00%cd%x00%s%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m \\033[32m%s\\033[0m  %-50s \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, $3, gensub(/(.{49}).{2,}/, \"\\\\1…\",\"g\",$4), $5, $6 }' | less -R"
+    l80 = "!git log --abbrev-commit --date=short --pretty=format:'%x00%h%x00%cd%x00%s%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m \\033[32m%s\\033[0m  %-80s \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, $3, gensub(/(.{79}).{2,}/, \"\\\\1…\",\"g\",$4), $5, $6 }' | less -R"
+    lg50 = "!git log --graph --color=always --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m %-50s \\033[32m%14s\\033[0m \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{49}).{2,}/, \"\\\\1…\",\"g\",$3), $4, $5, $6 }' | less -R"
+    lg80 = "!git log --graph --color=always --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m %-80s \\033[32m%14s\\033[0m \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{79}).{2,}/, \"\\\\1…\",\"g\",$3), $4, $5, $6 }' | less -R"
+

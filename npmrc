@@ -1,0 +1,8 @@
+# © 2013 D MALAM
+# Dotty npmrc
+
+loglevel = info
+cache = ${DOTTY_VAR}/npm
+long = true
+save = true
+userignorefile = ${DOTTY}/npmignore

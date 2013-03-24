@@ -1,0 +1,26 @@
+# © 2013 D MALAM
+# Dotty ackrc
+
+# Options
+--pager=$PAGER
+## Show column
+--column
+## Case sensitive IFF UPPERCASE
+--smart-case
+## Make output deterministic
+--sort-files
+
+# Color
+--color-filename=green
+--color-match=bold black on_magenta
+--color-lineno=blue
+
+# Ignores
+--ignore-dir=log
+--ignore-dir=vendor
+--ignore-dir=doc
+
+# More Types
+--type-add=html=haml,jade,mustache,ejs,erb
+--type-add=css=sass,scss,less,styl
+--type-add=js=coffee

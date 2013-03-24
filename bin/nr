@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+
+var repl = require('repl').start({prompt: '> ', ignoreUndefined: true});
+
+require('/usr/local/share/npm/lib/node_modules/repl.history')(repl, process.env.DOTTY_VAR + '/node_history');

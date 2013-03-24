@@ -1,0 +1,44 @@
+% © 2013 D MALAM
+% Dotty mostrc
+
+% Colors
+color normal white default
+color status green gray
+color underline blue default
+color overstrike red default
+
+% VI Keybindings
+% hjkl
+unsetkey "v"
+unsetkey "V"
+setkey down "j"
+setkey up "k"
+setkey column_left "h"
+setkey column_right "l"
+
+% Top / Bottom
+unsetkey "t"
+unsetkey "T"
+setkey bob "gg"
+unsetkey "b"
+unsetkey "B"
+setkey eob "G"
+
+% Commands
+setkey extended_key ";"
+setkey goto_line ":"
+
+% Marks
+unsetkey ","
+setkey goto_mark "'"
+
+% No S for search
+unsetkey "s"
+unsetkey "S"
+
+% Windows
+setkey two_windows    "^WS"
+setkey delete_window   "^WQ"
+unsetkey "o"
+unsetkey "O"
+setkey other_window   "^WW"

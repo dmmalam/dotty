@@ -1,0 +1,9 @@
+# © 2013 D MALAM
+# Dotty zlogout
+
+# Exit message.
+cat <<-EOF
+
+Bye Bye.
+
+EOF

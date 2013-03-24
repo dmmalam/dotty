@@ -1,0 +1,19 @@
+# © 2013 D MALAM
+# Dotty zlogin (post zshrc)
+
+# Execute in background.
+{
+  ## Compile the completion file.
+  zcompdump="$DOTTY_VAR/zcompdump"
+  if [[ "$zcompdump" -nt "${zcompdump}.zwc" || ! -s "${zcompdump}.zwc" ]]; then
+    zcompile "$zcompdump"
+  fi
+
+} &!
+
+# Print a random fortune via cowsay.
+if (( $+commands[fortune] )) && (($+commands[cowsay])) &&
+ ( (($+commands[shuf])) || (($+commands[gshuf])) ); then
+    fortune -s | cowsay -n -f `ls /usr/local/share/cows/ | shuf -n1`
+    print
+fi

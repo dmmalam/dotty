@@ -1,0 +1,841 @@
+# © 2013 D MALAM
+# Dotty zshrc
+
+dotty_exports(){
+    # Path to dotty, EDIT if necessary!!!
+    export DOTTY="$HOME/code/dotty"
+    export DOTTY_VAR="$DOTTY/var"
+    export ZSH="$DOTTY/zsh"
+    export PREFIX=`brew --prefix`
+
+    # PATH ~/.bin is pre-appended
+    # FIXME: Does this break OS scripts?
+    # Remember to edit /etc/paths so $PREFIX/bin is first!
+    # if [ -x /usr/libexec/path_helper ]; then
+    #     eval `/usr/libexec/path_helper -s`
+    #     export PATH=~/.bin/:${PATH}
+    # else
+        export PATH=~/.bin:$PREFIX/bin:$PREFIX/sbin:$PATH
+    # fi
+
+    # Use current locale
+    export LC_CTYPE=$LANG
+
+    # vi or emacs or nano ...
+    export EDITOR=vim
+
+    # Pager (most > less > more)
+    if [[ -x `''which'' most` ]]; then
+        export PAGER=most
+    else
+        export PAGER=less
+    fi
+    # Less options
+    export LESS=-ieMR
+}
+
+# Zsh Options
+# http://zsh.sourceforge.net/Doc/Release/Options.html#Options
+dotty_options(){
+    setopt combining_chars          # Assume terminal displays combining chars.
+
+    # Directories
+    setopt auto_cd                  # Change dir without cd.
+    setopt auto_pushd               # Cd pushed old dir onto stack.
+    setopt auto_name_dirs           # Any param that is an absolute name of dir, becomes that dir.
+    setopt pushd_ignore_dups        # Ignore copies on stack.
+
+    # Globbing
+    setopt bad_pattern              # Print errors for bad globs.
+    setopt extended_glob            # Treat the ‘#’, ‘~’, ‘^’ as part of glob.
+
+    # History
+    ## Command history configuration
+    HISTFILE=$DOTTY_VAR/zsh_history # Save history in dotty_var.
+    HISTSIZE=100000                 # History size is 100k.
+    SAVEHIST=100000                 # Save 100k.
+    setopt append_history           # Multiple ZSHs will all append history.
+    setopt bang_hist                # Treat the '!' character specially during expansion.
+    setopt extended_history         # Write the history file in the ':start:elapsed;command' format.
+    setopt inc_append_history       # Write to the history file immediately, not when the shell exits.
+    setopt share_history            # Share history between all sessions.
+    setopt hist_expire_dups_first   # Expire a duplicate event first when trimming history.
+    setopt hist_ignore_dups         # Do not record an event that was just recorded again.
+    setopt hist_ignore_all_dups     # Delete an old recorded event if a new event is a duplicate.
+    setopt hist_find_no_dups        # Do not display a previously found event.
+    setopt hist_ignore_space        # Do not record an event starting with a space.
+    setopt hist_save_no_dups        # Do not write a duplicate event to the history file.
+    setopt hist_verify              # Do not execute immediately upon history expansion.
+    setopt hist_reduce_blanks       # Remove excess blanks.
+    setopt hist_fcntl_lock          # Use system fcntl call to write history
+
+    # IO
+    setopt correct_all              # Correct spelling of all params.
+    unsetopt flowcontrol            # Ignore start/stop chars (^S/^Q).
+
+    # Jobs
+    setopt check_jobs               # Report status of jobs when exiting shell.
+    setopt long_list_jobs           # Use long format.
+    setopt posix_jobs               # POSIX compliant job control.
+
+    # Prompt
+    setopt prompt_subst             # Perform parameter expansion, command substitution, arithmetic expansion in prompts.
+
+    # Scripts & Functions
+    setopt multios                  # Implicant tees/cats when multiple redirections are attempted.
+
+    # zle
+    setopt no_beep                  # Don't beeps!
+}
+
+dotty_functions(){
+    # Only $ZSH/[functions|completions] are loaded
+    # Symlink from $ZSH/vendor/zsh-completions, or add any others
+    fpath=($ZSH/completions $ZSH/functions $fpath)
+
+    # Extract anything script
+    autoload -U extract
+    alias x='extract'
+
+    # zmv for regex mv
+    autoload -U zmv
+
+    # Spectrum Colors: Prints terminal color reference
+    autoload -U spectrum_ls
+    # Easily reference foreground, background colors and FX
+    typeset -Ag FX FG BG
+    FX=(
+        reset         "\e[00m"
+        bold          "\e[01m" no-bold          "\e[22m"
+        faint         "\e[02m" no-faint         "\e[22m"
+        italic        "\e[03m" no-italic        "\e[23m"
+        underline     "\e[04m" no-underline     "\e[24m"
+        blink         "\e[05m" no-blink         "\e[25m"
+        fast-blink    "\e[06m" no-fast-blink    "\e[25m"
+        reverse       "\e[07m" no-reverse       "\e[27m"
+        conceal       "\e[08m" no-conceal       "\e[28m"
+        strikethrough "\e[09m" no-strikethrough "\e[29m"
+    )
+    FG[reset]="$FX[reset]"
+    BG[reset]="$FX[reset]"
+    for color in {000..255}; do
+        FG[$color]="\e[38;5;${color}m"
+        BG[$color]="\e[48;5;${color}m"
+    done
+
+}
+
+# Completions
+dotty_completion(){
+    # Run Compinit, and store cache in dotty_var
+    autoload -U compinit && compinit -i -d $DOTTY_VAR/zcompdump
+    zmodload -i zsh/complist
+
+    # Automatically quote ?,", &
+    autoload -U url-quote-magic
+    zle -N self-insert url-quote-magic
+
+    # Cache completions and store in dotty_var
+    zstyle ':completion::complete:*' use-cache 1
+    zstyle ':completion::complete:*' cache-path "$DOTTY_VAR/zcompcache"
+
+    # Completion Options
+    setopt list_packed         # Variable width columns.
+    setopt list_types          # Show type of completion.
+    setopt cdable_vars         # Expand vars by pre-appending ~.
+    setopt complete_in_word    # Complete from both ends of a word.
+    setopt always_to_end       # Move cursor to the end of a completed word.
+    setopt path_dirs           # Perform path search even on command names with slashes.
+    setopt auto_menu           # Show completion menu on a successive tab press.
+    setopt auto_list           # Automatically list choices on ambiguous completion.
+    setopt auto_param_slash    # If completed parameter is a directory, add a trailing slash.
+    unsetopt menu_complete     # Do not autoselect the first completion entry.
+    unsetopt flow_control      # Disable start/stop characters in shell editor.
+
+    zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+    unsetopt case_glob
+
+    # Group matches and describe.
+    zstyle ':completion:*:*:*:*:*' menu select
+    zstyle ':completion:*:matches' group 'yes'
+    zstyle ':completion:*:options' description 'yes'
+    zstyle ':completion:*:options' auto-description '%d'
+    zstyle ':completion:*:corrections' format ' %F{green}-- %d (errors: %e) --%f'
+    zstyle ':completion:*:descriptions' format ' %F{yellow}-- %d --%f'
+    zstyle ':completion:*:messages' format ' %F{purple} -- %d --%f'
+    zstyle ':completion:*:warnings' format ' %F{red}-- no matches found --%f'
+    zstyle ':completion:*:default' list-prompt '%S%M matches%s'
+    zstyle ':completion:*' format ' %F{yellow}-- %d --%f'
+    zstyle ':completion:*' group-name ''
+    zstyle ':completion:*' verbose yes
+
+    # Fuzzy match mistyped completions.
+    zstyle ':completion:*' completer _complete _match _approximate
+    zstyle ':completion:*:match:*' original only
+    zstyle ':completion:*:approximate:*' max-errors 1 numeric
+
+    # Increase the number of errors based on the length of the typed word.
+    zstyle -e ':completion:*:approximate:*' max-errors 'reply=($((($#PREFIX+$#SUFFIX)/3))numeric)'
+
+    # Don't complete unavailable commands.
+    zstyle ':completion:*:functions' ignored-patterns '(_*|pre(cmd|exec))'
+
+    # Array completion element sorting.
+    zstyle ':completion:*:*:-subscript-:*' tag-order indexes parameters
+
+    # Directories
+    zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+    zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
+    zstyle ':completion:*:*:cd:*:directory-stack' menu yes select
+    zstyle ':completion:*:-tilde-:*' group-order 'named-directories' 'path-directories' 'users' 'expand'
+    zstyle ':completion:*' squeeze-slashes true
+
+    # History
+    zstyle ':completion:*:history-words' stop yes
+    zstyle ':completion:*:history-words' remove-all-dups yes
+    zstyle ':completion:*:history-words' list false
+    zstyle ':completion:*:history-words' menu yes
+
+    # Environmental Variables
+    zstyle ':completion::*:(-command-|export):*' fake-parameters ${${${_comps[(I)-value-*]#*,}%%,*}:#-*-}
+
+    # Populate hostname completion.
+    zstyle -e ':completion:*:hosts' hosts 'reply=(
+      ${=${${(f)"$(cat {/etc/ssh_,~/.ssh/known_}hosts(|2)(N) 2>/dev/null)"}%%[#| ]*}//,/ }
+      ${=${(f)"$(cat /etc/hosts(|)(N) <<(ypcat hosts 2>/dev/null))"}%%\#*}
+      ${=${${${${(@M)${(f)"$(cat ~/.ssh/config 2>/dev/null)"}:#Host *}#Host }:#*\**}:#*\?*}}
+    )'
+
+    # Don't complete uninteresting users...
+    zstyle ':completion:*:*:*:users' ignored-patterns \
+      adm amanda apache avahi beaglidx bin cacti canna clamav daemon \
+      dbus distcache dovecot fax ftp games gdm gkrellmd gopher \
+      hacluster haldaemon halt hsqldb ident junkbust ldap lp mail \
+      mailman mailnull mldonkey mysql nagios \
+      named netdump news nfsnobody nobody nscd ntp nut nx openvpn \
+      operator pcap postfix postgres privoxy pulse pvm quagga radvd \
+      rpc rpcuser rpm shutdown squid sshd sync uucp vcsa xfs '_*'
+
+    # ... unless we really want to.
+    zstyle '*' single-ignored show
+
+    # Ignore multiple entries.
+    zstyle ':completion:*:(rm|kill|diff):*' ignore-line other
+    zstyle ':completion:*:rm:*' file-patterns '*:all-files'
+
+    # Kill TODO: Add pkill
+    zstyle ':completion:*:*:*:*:processes' command 'ps -u $USER -o pid,user,comm -w'
+    zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;36=0=01'
+    zstyle ':completion:*:*:kill:*' menu yes select
+    zstyle ':completion:*:*:kill:*' force-list always
+    zstyle ':completion:*:*:kill:*' insert-ids single
+
+    # Man
+    zstyle ':completion:*:manuals' separate-sections true
+    zstyle ':completion:*:manuals.(^1*)' insert-sections true
+
+    # SSH/SCP/RSYNC
+    zstyle ':completion:*:(scp|rsync):*' tag-order 'hosts:-host:host hosts:-domain:domain hosts:-ipaddr:ip\ address *'
+    zstyle ':completion:*:(scp|rsync):*' group-order users files all-files hosts-domain hosts-host hosts-ipaddr
+    zstyle ':completion:*:ssh:*' tag-order users 'hosts:-host:host hosts:-domain:domain hosts:-ipaddr:ip\ address *'
+    zstyle ':completion:*:ssh:*' group-order hosts-domain hosts-host users hosts-ipaddr
+    zstyle ':completion:*:(ssh|scp|rsync):*:hosts-host' ignored-patterns '*(.|:)*' loopback ip6-loopback localhost ip6-localhost broadcasthost
+    zstyle ':completion:*:(ssh|scp|rsync):*:hosts-domain' ignored-patterns '<->.<->.<->.<->' '^[-[:alnum:]]##(.[-[:alnum:]]##)##' '*@*'
+    zstyle ':completion:*:(ssh|scp|rsync):*:hosts-ipaddr' ignored-patterns '^(<->.<->.<->.<->|(|::)([[:xdigit:].]##:(#c,2))##(|%*))' '127.0.0.<->' '255.255.255.255' '::1' 'fe80::*'
+}
+
+# Key Binding
+# http://zsh.sourceforge.net/Doc/Release/Zsh-Line-Editor.html#Movement
+dotty_key_binding(){
+    # Words are everything
+    WORDCHARS=''
+    # Default emacs
+    bindkey -e
+    # Ctrl+K to copy previous word
+    bindkey "^K" copy-prev-shell-word
+    # Fn+Left/Home, Fn+Right/End
+    bindkey "^[[1~" beginning-of-line
+    bindkey "^[[4~" end-of-line
+    # Shift-Tab
+    bindkey '^[[Z' reverse-menu-complete
+    # Backspace
+    bindkey "^?" backward-delete-char
+    # Fn+Backspace/Del
+    bindkey "^[[3~" delete-char
+    # Alt+Left, Alt+Right
+    # Mac keyboard
+    bindkey "^[f" forward-word
+    bindkey "^[b" backward-word
+    # PageUp / PageDown
+    # bindkey "^[[5~" up-line-or-history
+    # bindkey "^[[6~" down-line-or-history
+    # Perform history expansion & insert space
+    bindkey " " magic-space
+}
+
+# Alias'
+dotty_alias(){
+    # mnemonics
+    alias c='cat'
+    alias m=$PAGER
+    alias e=$EDITOR
+    alias h='run-help'
+    alias cls=clear # Also ^L
+    # Show history
+    alias history='fc -l 1'
+    # Super user
+    alias _='sudo'
+    ## Execute previous command with sudo prefix:
+    alias fu='sudo $( fc -ln -1)'
+    # List directory contents
+    alias p=pwd
+    # ... -> ../..
+    rationalise-dot() {
+      if [[ $LBUFFER = *.. ]]; then
+        LBUFFER+=/..
+      else
+        LBUFFER+=.
+      fi
+    }
+    zle -N rationalise-dot
+    bindkey . rationalise-dot
+    alias cd/='cd /'
+    # Push and pop directories on directory stack
+    alias pu='pushd'
+    alias po='popd'
+    # Global
+    alias -g H='| head'
+    alias -g EH='|& head'
+    alias -g M='| $PAGER'
+    alias -g EM='|& $PAGER'
+    alias -g G='| grep -'
+    alias -g T='| tail'
+    alias -g ET='|& tail'
+    alias -g TEE='| tee '
+    alias -g F='| fmt -'
+    alias -g W='| wc -l'
+    alias -g S='| sort'
+    alias -g X='| xargs'
+    alias -g NUL='> /dev/null 2>&1'
+
+    # File Operations
+    ## LS
+    alias l=ls
+    alias sl=ls
+    alias d='dirs -v'
+    ## 1..9 cds to dir in stack
+    for index ({1..9}) alias "$index"="cd +${index}"; unset index
+    alias remove='rm -vrf'          # FORCE remove
+    ## mkdir & cd to it
+    mcd () {
+      mkdir -vp "$1" && cd "$1";
+    }
+    alias mkdir='mkdir -vp'             # verbose, path
+    alias md="mkdir"
+    alias cp='cp -vai'                  # verbose, preserve attributes, recurse, prompt on overwrite
+    # Rsync based robust copy
+    alias cpr='nocorrect rsync -aAXv --stats --progress'
+    alias mv='mv -vi'                   # verbose, prompt on overwrite
+    alias chmod='chmod -v'              # verbose
+    alias chown='chown -v'              # verbose
+    alias chownr='chown -vr'            # verbose, recurse
+    alias df='df -ahi'                  # all, human readable sizes, inode stats
+    alias du='du -h'                    # human readable sizes
+    alias ln='ln -iv'                   # verbose, prompt on overwrite
+    alias lns='ln -ivs'                 # verbose, prompt on overwrite, symbolic
+    ## Make which return all instances
+    alias which='nocorrect which -a'    # all
+    alias wh="which"
+
+    # No Corrections, as args are non existing
+    alias cp='nocorrect cp'
+    alias mv='nocorrect mv'
+    alias touch='nocorrect touch'
+    alias man='nocorrect man'
+    alias mkdir='nocorrect mkdir'
+    alias curl='nocorrect curl'
+    alias git='nocorrect git'
+
+    # Suffix (file.tex -> vim file.tex)
+    alias -s tex=vim
+
+    # Hashes (cd ~XX)
+    hash -d dotty=$DOTTY
+
+    # Benchmark ZSH load time
+    alias bench='time zsh -i -c exit'
+    # Programs
+    alias get='curl --continue-at - --location --progress-bar --remote-name --remote-time'
+}
+
+# Theme
+dotty_theme(){
+    # Give colors meaningful names
+    autoload colors && colors
+
+    # Prompt
+    ## Collapse working directory in prompt like fish
+    _collapsed_wd() {
+        echo $(pwd | perl -pe "s|^$HOME|~|g; s|/([^/])[^/]*(?=/)|/\$1|g")
+    }
+    ## Left Prompt: <collapsed dir> <cursor, crown if root> <VC_status>
+    PROMPT='%B%F{189}$(_collapsed_wd)%f %(!.%F{160}♛%f.%F{229}❯%f)%b ${vcs_info_msg_0_}'
+    ## Right Prompt: <#jobs if not 0> <return status if not 0> <HH:MM:SS (approx history)>
+    local jobs='%1(j.%F{083}♞ %j%f .)'
+    local return_status='%(?..%F{160}☹ %?%f )'
+    RPROMPT="$jobs$return_status%F{189}%*%f"
+    ## AutoCorrect Prompt
+    SPROMPT='%F{red}%R →%f %F{green}%r?%f (%B%F{green}Y%f%bes, %B%F{red}N%f%bo, %B%F{160}A%f%bbort, %B%F{blue}E%f%bdit) '
+
+    ## VCS Colors
+    VCS_BRANCH_FORMAT='%b%F{1}:%F{11}%r'
+    VCS_ACTION_FORMATS='%%B%F{121}%s%F{111}(%b)%F{160}:%a%u%c%%b '
+    VCS_FORMATS='%%B%F{121}%s%F{111}(%b)%u%c%%b '
+    VCS_DIRTY=%F{98}✹%f
+    VCS_STAGED='%F{green}✚%f'
+    VCS_UNSTAGED='%F{191}✗%f'
+    VCS_GIT=±
+    VCS_HG=☿
+
+    ## ZSH builtin source control info
+    autoload -Uz vcs_info
+    zstyle ':vcs_info:*' enable bzr git hg svn
+    zstyle ':vcs_info:*' check-for-changes true
+    zstyle ':vcs_info:(git|hg)' get-revision false
+    zstyle ':vcs_info:(svn|bzr)' get-revision true
+    ### %c String for staged
+    zstyle ':vcs_info:*' stagedstr $VCS_STAGED
+    ### %u String for unstaged
+    zstyle ':vcs_info:*' unstagedstr $VCS_UNSTAGED
+    zstyle ':vcs_info:(svn|bzr):*' branchformat $VCS_BRANCH_FORMAT
+    zstyle ':vcs_info:*' actionformats $VCS_ACTION_FORMATS
+    zstyle ':vcs_info:*' formats $VCS_FORMATS
+    zstyle ':vcs_info:git+set-message:*' hooks formatGit
+    +vi-formatGit() {
+        hook_com[vcs]=$VCS_GIT
+        if [[ ! -z $(git ls-files --other --exclude-standard 2> /dev/null) ]] {
+            hook_com[unstaged]=$hook_com[unstaged]$VCS_DIRTY
+        }
+    }
+    zstyle ':vcs_info:hg+set-message:*' hooks formatHg
+    +vi-formatHg() {
+        hook_com[vcs]=$VCS_HG
+    }
+    ### Executes before prompt
+    precmd () {
+        vcs_info
+    }
+    setopt prompt_subst
+
+    # History sub-string match
+    source $ZSH/vendor/zsh-history-substring-search/zsh-history-substring-search.zsh
+
+    # Syntax Highlighting
+    ZSH_HIGHLIGHT_HIGHLIGHTERS=(main cursor root brackets)
+    source $ZSH/vendor/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+}
+
+# User land settings, try to detect before setting up.
+dotty_vendor(){
+    # Apps
+    ## Grep
+    export GREP_OPTIONS='--color=auto'
+    export GREP_COLOR='1;32'
+
+    ## Ack
+    if [[ -x `'which' ack` ]] {
+        alias ack!="ack -v"
+        alias ackl="ack -l"
+        alias ackl!="ack -L"
+    }
+
+    ## Ag
+    if [[ -x `'which' ag` ]] {
+        alias ag='ag -S --column --color '
+        alias ag!="ag -v"
+        alias agl='ag -l'
+        alias agl!='ag -L'
+        alias aga="ag -u"
+    }
+
+    ## Syntax highlighting less
+    if [[ -d $PREFIX/share/vim ]]; then
+        alias vless=$PREFIX/share/vim/vim73/macros/less.sh
+    else
+        alias vless=/usr/share/vim/vim73/macros/less.sh
+    fi
+
+    ## Git
+    alias g='git'
+
+    # Ruby - Faster Unrolled Ruby rbenv.
+    if [[ -d $HOME/.rbenv ]] {
+        # eval "$(rbenv init -)"
+        export PATH="$HOME/.rbenv/shims:${PATH}"
+        source "$PREFIX/Cellar/rbenv/0.4.0/libexec/../completions/rbenv.zsh"
+        rbenv() {
+          command="$1"
+          if [ "$#" -gt 0 ]; then
+            shift
+          fi
+
+          case "$command" in
+          shell)
+            eval `rbenv "sh-$command" "$@"`;;
+          *)
+            command rbenv "$command" "$@";;
+          esac
+        }
+        # Do expensive rehash only when needed, not every login!
+        gem() {
+            command gem $@
+            rbenv rehash 2>/dev/null
+        }
+        # Update everything
+        alias gu="gem update --system && gem update && gem cleanup -q"
+    }
+
+    # Node
+    if [[ -d $PREFIX/share/npm/bin ]] {
+        # NPM global bin
+        export PATH="$PREFIX/share/npm/bin:${PATH}"
+        alias n=npm
+        alias npmg='npm -g'
+        alias nu="npm update npm -g; npm update -g"
+        # Unrolled NPM completion
+        # eval "$(npm completion 2>/dev/null)"
+        COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
+        COMP_WORDBREAKS=${COMP_WORDBREAKS/@/}
+        export COMP_WORDBREAKS
+        if type complete &>/dev/null; then
+          _npm_completion () {
+            local si="$IFS"
+            IFS=$'\n' COMPREPLY=($(COMP_CWORD="$COMP_CWORD" \
+                                   COMP_LINE="$COMP_LINE" \
+                                   COMP_POINT="$COMP_POINT" \
+                                   npm completion -- "${COMP_WORDS[@]}" \
+                                   2>/dev/null)) || return $?
+            IFS="$si"
+          }
+          complete -F _npm_completion npm
+        elif type compdef &>/dev/null; then
+          _npm_completion() {
+            si=$IFS
+            compadd -- $(COMP_CWORD=$((CURRENT-1)) \
+                         COMP_LINE=$BUFFER \
+                         COMP_POINT=0 \
+                         npm completion -- "${words[@]}" \
+                         2>/dev/null)
+            IFS=$si
+          }
+          compdef _npm_completion npm
+        elif type compctl &>/dev/null; then
+          _npm_completion () {
+            local cword line point words si
+            read -Ac words
+            read -cn cword
+            let cword-=1
+            read -l line
+            read -ln point
+            si="$IFS"
+            IFS=$'\n' reply=($(COMP_CWORD="$cword" \
+                               COMP_LINE="$line" \
+                               COMP_POINT="$point" \
+                               npm completion -- "${words[@]}" \
+                               2>/dev/null)) || return $?
+            IFS="$si"
+          }
+          compctl -K _npm_completion npm
+        fi
+
+        if [[ -x `'which' jitsu` ]] {
+            alias jitsu='nocorrect jitsu'
+        }
+        if [[ -x `'which' jake` ]] {
+            _jake () {
+                if [ -f Jakefile ]||[ -f jakefile ]||[ -f Jakefile.coffee ]||[ -f jakefile.coffee ]; then
+                    compadd `jake -T | cut -d " " -f 2 | sed -E "s/.\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"`
+                fi
+            }
+            compdef _jake jake
+            alias jake='noglob jake'
+            alias j='noglob jake'
+        }
+        if [[ -x `'which' cake` ]] {
+            _cake () {
+                if [ -f Cakefile ]; then
+                    compadd `cake | grep '^cake ' | sed -e "s/cake \([^ ]*\) .*/\1/" | grep -v '^$'`
+                fi
+            }
+            compdef _cake cake
+        }
+    }
+
+    # Python
+    if [[ -d $PREFIX/share/python ]] {
+        export PATH="$PREFIX/share/python:${PATH}"
+        export PYTHONPATH=$PREFIX/lib/python2.7/site-packages:$PYTHONPATH
+        export PYTHONSTARTUP=$DOTTY/pythonstartup
+        alias pipu="pip install --upgrade pip distribute"
+    }
+    # Go
+    if [[ -x `'which' go` ]] {
+        export GOPATH="$PREFIX/Cellar/go"
+        export PATH="$GOPATH:${PATH}"
+    }
+
+    # R
+    if [[ -x $PREFIX/bin/r ]] {
+        # Remove builtin r[epeat] command
+        disable r
+    }
+
+    # Colors for core utils
+    if [[ -x `'which' grc` ]] {
+        alias colourify="grc -es --colour=auto"
+        alias configure='colourify ./configure'
+        alias diff='colourify diff'
+        alias wdiff='colourify wdiff'
+        alias make='colourify make'
+        alias gcc='colourify gcc'
+        alias g++='colourify g++'
+        alias as='colourify as'
+        alias ld='colourify ld'
+        alias netstat='colourify netstat'
+        alias ping='colourify ping'
+        alias last='colourify last'
+        alias traceroute='colourify traceroute'
+        alias rsync='grc --config=conf.rsync rsync'
+        alias cowsay='grc --config=conf.cowsay cowsay'
+    }
+
+    if [[ -x `'which' sublime` ]] {
+        subl(){
+            if (($# == 0)) {
+                sublime .
+            } else {
+                sublime $*
+            }
+        }
+        alias subl='nocorrect subl'
+    }
+    if [[ -x `'which' weechat-curses` ]] {
+        alias chat=weechat-curses
+    }
+    if [[ -x `'which' htop` ]] {
+        alias t=htop
+        alias tcpu='htop --sort-key CPU%'
+        alias tmem='htop --sort-key MEM%'
+        alias ttime='htop --sort-key TIME+'
+    }
+   if [[ -x `'which' multitail` ]] {
+        alias mt='multitail -C'
+   }
+}
+# MacOSX
+dotty_macosx(){
+    ## BSD ls
+    export LSCOLORS=Exfxcxdxbxegedabagacad
+
+    # Alias'
+    ## File
+    alias ls='ls -FG'                   # F=classify type, G=color
+    alias la='ls -AFG'                  # A=all but . or ..
+    alias ll='ls -@AFGhle'              # @=show extended attrs, h=human readable sizes, l=long format, e=show ACLs
+    alias ll!='ls -@AFGhler'            # r=reverse default alphabetical format
+    alias llr='ls -@AFGhleR'            # R=recurse
+    alias llsize='ls -@AFGhleS'         # S=sort by size descending
+    alias llsize!='ls -@AFGhleSr'       # Sr=sort by size ascending
+    alias lltime='ls -@AFGhlet'         # t=sort by time newest first
+    alias lltime!='ls -@AFGhletr'       # tr=sort by time oldest first
+    alias llaccess='ls -@AFGhleu'       # u=sort by last access newest first
+    alias llaccess!='ls -@AFGhleur'     # ur=sort by last oldest first
+    alias llcreation='ls -@AFGhleU'     # U=sort by creation newest first
+    alias llcreation!='ls -@AFGhleUr'   # Ur=sort by creation oldest first
+    alias rm='rm -vd'           # verbose, dirs
+
+
+    ## Extended attributes
+    alias xa='xattr'
+    alias xals='xattr l'                # list attributes
+    alias xaclear='xattr -c'            # clear attributes
+
+    ## GNU LS
+    if [[ -x `'which' gls` ]] {
+        ###  Solarized Theme
+        export LS_COLORS='no=00;38;5;244:rs=0:di=00;38;5;33:ln=01;38;5;33:mh=00:pi=48;5;230;38;5;136;01:so=48;5;230;38;5;136;01:do=48;5;230;38;5;136;01:bd=48;5;230;38;5;244;01:cd=48;5;230;38;5;244;01:or=48;5;235;38;5;160:su=48;5;160;38;5;230:sg=48;5;136;38;5;230:ca=30;41:tw=48;5;64;38;5;230:ow=48;5;235;38;5;33:st=48;5;33;38;5;230:ex=01;38;5;64:*.tar=00;38;5;61:*.tgz=01;38;5;61:*.arj=01;38;5;61:*.taz=01;38;5;61:*.lzh=01;38;5;61:*.lzma=01;38;5;61:*.tlz=01;38;5;61:*.txz=01;38;5;61:*.zip=01;38;5;61:*.z=01;38;5;61:*.Z=01;38;5;61:*.dz=01;38;5;61:*.gz=01;38;5;61:*.lz=01;38;5;61:*.xz=01;38;5;61:*.bz2=01;38;5;61:*.bz=01;38;5;61:*.tbz=01;38;5;61:*.tbz2=01;38;5;61:*.tz=01;38;5;61:*.deb=01;38;5;61:*.rpm=01;38;5;61:*.jar=01;38;5;61:*.rar=01;38;5;61:*.ace=01;38;5;61:*.zoo=01;38;5;61:*.cpio=01;38;5;61:*.7z=01;38;5;61:*.rz=01;38;5;61:*.apk=01;38;5;61:*.jpg=00;38;5;136:*.JPG=00;38;5;136:*.jpeg=00;38;5;136:*.gif=00;38;5;136:*.bmp=00;38;5;136:*.pbm=00;38;5;136:*.pgm=00;38;5;136:*.ppm=00;38;5;136:*.tga=00;38;5;136:*.xbm=00;38;5;136:*.xpm=00;38;5;136:*.tif=00;38;5;136:*.tiff=00;38;5;136:*.png=00;38;5;136:*.svg=00;38;5;136:*.svgz=00;38;5;136:*.mng=00;38;5;136:*.pcx=00;38;5;136:*.dl=00;38;5;136:*.xcf=00;38;5;136:*.xwd=00;38;5;136:*.yuv=00;38;5;136:*.cgm=00;38;5;136:*.emf=00;38;5;136:*.eps=00;38;5;136:*.pdf=01;38;5;245:*.tex=01;38;5;245:*.rdf=01;38;5;245:*.owl=01;38;5;245:*.n3=01;38;5;245:*.tt=01;38;5;245:*.nt=01;38;5;245:*.log=00;38;5;240:*.bak=00;38;5;240:*.aux=00;38;5;240:*.bbl=00;38;5;240:*.blg=00;38;5;240:*.aac=00;38;5;166:*.au=00;38;5;166:*.flac=00;38;5;166:*.mid=00;38;5;166:*.midi=00;38;5;166:*.mka=00;38;5;166:*.mp3=00;38;5;166:*.mpc=00;38;5;166:*.ogg=00;38;5;166:*.ra=00;38;5;166:*.wav=00;38;5;166:*.axa=00;38;5;166:*.oga=00;38;5;166:*.spx=00;38;5;166:*.xspf=00;38;5;166:*.mov=01;38;5;166:*.mpg=01;38;5;166:*.mpeg=01;38;5;166:*.m2v=01;38;5;166:*.mkv=01;38;5;166:*.ogm=01;38;5;166:*.mp4=01;38;5;166:*.m4v=01;38;5;166:*.mp4v=01;38;5;166:*.vob=01;38;5;166:*.qt=01;38;5;166:*.nuv=01;38;5;166:*.wmv=01;38;5;166:*.asf=01;38;5;166:*.rm=01;38;5;166:*.rmvb=01;38;5;166:*.flc=01;38;5;166:*.avi=01;38;5;166:*.fli=01;38;5;166:*.flv=01;38;5;166:*.gl=01;38;5;166:*.axv=01;38;5;166:*.anx=01;38;5;166:*.ogv=01;38;5;166:*.ogx=01;38;5;166:';
+
+        # Match BSD ls alias'
+        alias gls='gls -F --color=auto'
+        alias gla='gls -AF --color=auto'
+        alias gll='gls -AFhl --color=auto'
+        alias gll!='gls -AFhlr --color=auto'
+        alias gllr='gls -AFhlR --color=auto'
+        alias gllsize='gls -AFhlS --color=auto'
+        alias gllsize!='gls -AFhlSr --color=auto'
+        alias glltime='gls -AFhlt --color=auto'
+        alias glltime!='gls -AFhltr --color=auto'
+        alias gllaccess='gls -AFhlu --color=auto'
+        alias gllaccess!='gls -AFhlur --color=auto'
+        alias gllcreation='gls -AFhlc --color=auto'
+        alias gllcreation!='gls -AFhlcr --color=auto'
+
+        # shuf is
+        alias shuf='gshuf'
+    }
+
+    ## Use safe delete
+    if [[ -x `'which' rmtrash` ]] {
+        alias del='rmtrash'
+    }
+
+    ## Processes
+    alias ps='ps -av'               # all process' with controlling term, stats
+    alias psa='ps -Avf'             # all, stats
+
+    ## pstree
+    if [[ -x `'which' pstree` ]] {
+        alias pstree='pstree -g 3'
+    }
+
+    # Open
+    o () {
+        if (($# == 0)) {
+            open .
+        } else {
+            open $*
+        }
+    }
+    alias ql='qlmanage -p 2>/dev/null' # Quick Look
+    alias rm-osx='rm **/./(.DS_STORE|__MACOSX)' # Recursively Delete .DS_Store and __MACOSX
+
+    # Open man pages in Preview
+    pman () {
+        man $1 -t | open -f -a Preview
+    }
+
+    # Set proxy icon icon
+    update_terminal_cwd () {
+        set-title "$PWD"
+    }
+
+    # autoload add-zsh-hook
+    add-zsh-hook chpwd update_terminal_cwd
+    update_terminal_cwd
+
+    # get/set volume
+    vol() {
+        if [[ -n $1 ]] {
+            osascript -e "set volume output volume $1"
+        } else {
+            osascript -e "output volume of (get volume settings)"
+        }
+    }
+
+    # Java - Use java system preference to set default
+    export JAVA_HOME=`/usr/libexec/java_home`
+
+    # Brew
+    if [[ -x `'which' brew` ]] {
+        export HOMEBREW_VERBOSE=1
+        export HOMEBREW_CC="clang"
+        alias brew='nocorrect brew'
+        alias b="brew"
+        alias bi="brew info"
+        alias big="brew info --github"  # open github page
+        alias bs="brew search"
+        alias bu="brew update && brew upgrade && brew cleanup --force -s"
+        alias brews="brew list"
+        hash -d prefix=`brew --prefix`
+
+        ### Command not found, displays message if brew exists for unknown command.
+        cnf_preexec() {
+            typeset -g cnf_command="${1%% *}"
+         }
+        cnf_precmd() {
+          (($? == 127)) && [ -n "$cnf_command" ] && {
+            whence -- "$cnf_command" >& /dev/null ||
+              (brew info "$cnf_command" >& /dev/null && echo "Brew $FX[bold]$FG[128]$cnf_command$FG[15]$FX[reset] available, but not installed.\nType $FG[214]$FX[bold]brew install $cnf_command$FX[reset]$FG[15] to install."
+               )
+            unset cnf_command
+          }
+        }
+
+        typeset -ga preexec_functions
+        typeset -ga precmd_functions
+        preexec_functions+=cnf_preexec
+        precmd_functions+=cnf_precmd
+
+        ## Byobu
+        if [[ -x `'which' byobu` ]] {
+            export BYOBU_PREFIX=$PREFIX
+        }
+    }
+
+}
+# Debian based Linux
+dotty_debian(){
+    # GNU LS - Solarized Theme
+    export LS_COLORS='no=00;38;5;244:rs=0:di=00;38;5;33:ln=01;38;5;33:mh=00:pi=48;5;230;38;5;136;01:so=48;5;230;38;5;136;01:do=48;5;230;38;5;136;01:bd=48;5;230;38;5;244;01:cd=48;5;230;38;5;244;01:or=48;5;235;38;5;160:su=48;5;160;38;5;230:sg=48;5;136;38;5;230:ca=30;41:tw=48;5;64;38;5;230:ow=48;5;235;38;5;33:st=48;5;33;38;5;230:ex=01;38;5;64:*.tar=00;38;5;61:*.tgz=01;38;5;61:*.arj=01;38;5;61:*.taz=01;38;5;61:*.lzh=01;38;5;61:*.lzma=01;38;5;61:*.tlz=01;38;5;61:*.txz=01;38;5;61:*.zip=01;38;5;61:*.z=01;38;5;61:*.Z=01;38;5;61:*.dz=01;38;5;61:*.gz=01;38;5;61:*.lz=01;38;5;61:*.xz=01;38;5;61:*.bz2=01;38;5;61:*.bz=01;38;5;61:*.tbz=01;38;5;61:*.tbz2=01;38;5;61:*.tz=01;38;5;61:*.deb=01;38;5;61:*.rpm=01;38;5;61:*.jar=01;38;5;61:*.rar=01;38;5;61:*.ace=01;38;5;61:*.zoo=01;38;5;61:*.cpio=01;38;5;61:*.7z=01;38;5;61:*.rz=01;38;5;61:*.apk=01;38;5;61:*.jpg=00;38;5;136:*.JPG=00;38;5;136:*.jpeg=00;38;5;136:*.gif=00;38;5;136:*.bmp=00;38;5;136:*.pbm=00;38;5;136:*.pgm=00;38;5;136:*.ppm=00;38;5;136:*.tga=00;38;5;136:*.xbm=00;38;5;136:*.xpm=00;38;5;136:*.tif=00;38;5;136:*.tiff=00;38;5;136:*.png=00;38;5;136:*.svg=00;38;5;136:*.svgz=00;38;5;136:*.mng=00;38;5;136:*.pcx=00;38;5;136:*.dl=00;38;5;136:*.xcf=00;38;5;136:*.xwd=00;38;5;136:*.yuv=00;38;5;136:*.cgm=00;38;5;136:*.emf=00;38;5;136:*.eps=00;38;5;136:*.pdf=01;38;5;245:*.tex=01;38;5;245:*.rdf=01;38;5;245:*.owl=01;38;5;245:*.n3=01;38;5;245:*.tt=01;38;5;245:*.nt=01;38;5;245:*.log=00;38;5;240:*.bak=00;38;5;240:*.aux=00;38;5;240:*.bbl=00;38;5;240:*.blg=00;38;5;240:*.aac=00;38;5;166:*.au=00;38;5;166:*.flac=00;38;5;166:*.mid=00;38;5;166:*.midi=00;38;5;166:*.mka=00;38;5;166:*.mp3=00;38;5;166:*.mpc=00;38;5;166:*.ogg=00;38;5;166:*.ra=00;38;5;166:*.wav=00;38;5;166:*.axa=00;38;5;166:*.oga=00;38;5;166:*.spx=00;38;5;166:*.xspf=00;38;5;166:*.mov=01;38;5;166:*.mpg=01;38;5;166:*.mpeg=01;38;5;166:*.m2v=01;38;5;166:*.mkv=01;38;5;166:*.ogm=01;38;5;166:*.mp4=01;38;5;166:*.m4v=01;38;5;166:*.mp4v=01;38;5;166:*.vob=01;38;5;166:*.qt=01;38;5;166:*.nuv=01;38;5;166:*.wmv=01;38;5;166:*.asf=01;38;5;166:*.rm=01;38;5;166:*.rmvb=01;38;5;166:*.flc=01;38;5;166:*.avi=01;38;5;166:*.fli=01;38;5;166:*.flv=01;38;5;166:*.gl=01;38;5;166:*.axv=01;38;5;166:*.anx=01;38;5;166:*.ogv=01;38;5;166:*.ogx=01;38;5;166:';
+
+    # Alias'
+    ## File
+    alias ls='ls -F --color=auto'
+    alias la='ls -AF --color=auto'
+    alias ll='ls -AFhl --color=auto'
+    alias ll!='ls -AFhlr --color=auto'
+    alias llr='ls -AFhlR --color=auto'
+    alias llsize='ls -AFhlS --color=auto'
+    alias llsize!='ls -AFhlSr --color=auto'
+    alias lltime='ls -AFhlt --color=auto'
+    alias lltime!='ls -AFhltr --color=auto'
+    alias llaccess='ls -AFhlu --color=auto'
+    alias llaccess!='ls -AFhlur --color=auto'
+    alias llcreation='ls -AFhlc --color=auto'
+    alias llcreation!='ls -AFhlcr --color=auto'
+
+    alias rm='rm -vrI'                      # verbose, recurse, prompt for silly
+
+    ## Processes
+    alias ps='ps avf'                       # all process with term, virtual mem, ascii art forest
+    alias psa='ps -A vf'                    # all, virtual mem, ascii art forest
+    alias free='free -tm'                   # totals, in MBs
+
+    ## Ubuntu Alias'
+    alias ag='apt-get -y'                   # assume yes
+    alias at='aptitude -y'                  # assume yes
+    alias agu='apt-get update && apt-get upgrade'
+
+    # Functions
+    ## Apt-get command not found
+    source /etc/zsh_command_not_found
+
+    ## Terminal title
+    case $TERM in
+        sun-cmd)
+            update_terminal_cwd() { print -Pn "\e]l%~\e\\" };;
+        *xterm*|rxvt|(dt|k|E)term)
+            update_terminal_cwd() { print -Pn "\e]2;%~\a" };;
+        *)
+            update_terminal_cwd() {};;
+    esac
+}
+
+# Load order
+dotty_exports               # Setup environment
+dotty_options               # Setup ZSH options
+dotty_functions             # Setup functions
+dotty_completion            # Setup completion
+dotty_key_binding           # Setup key-binding
+dotty_alias                 # Setup alias'
+dotty_theme                 # Setup theme
+dotty_vendor                # Setup 3rd party cross platform software
+if [[ $(uname) == Darwin ]] {
+    dotty_macosx            # Setup MacOSX specific
+} elif [[ $(lsb_release -is) == Ubuntu ]] {
+    dotty_debian            # Setup Debian specific
+}
+source "$ZSH/zcustom.zsh"   # Setup personal customisations
+# Remove from global functions
+unfunction -m "dotty_*"

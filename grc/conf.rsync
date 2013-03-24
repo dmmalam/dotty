@@ -1,0 +1,18 @@
+# deleting
+regexp=^\*deleting
+colours=red
+count=more
+=====
+# new
+regexp=^(>f\+{9})
+colours=green
+count=more
+=====
+# changes
+regexp=^(>f[\.|s|t|o|g]{9})
+colours=yellow
+count=more
+# new directory
+regexp=^(cd\+{9})
+colours=green
+count=more

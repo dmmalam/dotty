@@ -1,0 +1,17 @@
+#!/bin/sh -e
+
+# Usage
+if [ $# -lt 1 ]; then
+  echo "usage: ec2-add-local-keypair KEYPAIR_NAME [PUBLIC_KEY (Defaults:~/.ssh/id_rsa.pub)]" >/dev/stderr
+  exit 1;
+fi
+
+keypair=$1
+publickeyfile=$HOME/.ssh/id_rsa.pub
+
+regions=$(ec2-describe-regions | cut -f2)
+
+for region in $regions; do
+  echo $region
+  ec2-import-keypair --region $region --public-key-file $publickeyfile $keypair
+done

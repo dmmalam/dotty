@@ -1,0 +1,10 @@
+# http://www.openbsd.org/cgi-bin/man.cgi?query=ssh_config&sektion=5
+
+Compression yes
+ControlMaster auto
+ControlPath /tmp/ssh_%h%p%r
+ControlPersist 1h
+ForwardAgent yes
+GSSAPIAuthentication no
+# so zsh hosts completion works
+HashKnownHosts no

@@ -1,0 +1,12 @@
+[submodule "zsh/vendor/zsh-syntax-highlighting"]
+	path = zsh/vendor/zsh-syntax-highlighting
+	url = git://github.com/zsh-users/zsh-syntax-highlighting.git
+[submodule "zsh/vendor/zsh-history-substring-search"]
+	path = zsh/vendor/zsh-history-substring-search
+	url = git://github.com/zsh-users/zsh-history-substring-search.git
+[submodule "zsh/vendor/zsh-completions"]
+	path = zsh/vendor/zsh-completions
+	url = git://github.com/zsh-users/zsh-completions.git
+[submodule "vim/bundle/vundle"]
+	path = vim/bundle/vundle
+	url = git://github.com/gmarik/vundle.git
